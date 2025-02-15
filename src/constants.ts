@@ -1,0 +1,1 @@
+export const BASEURL: URL = new URL("http://localhost:8080");
