@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DurationComponent from "../DurationComponent";
 
 function CreateCourseModal({ isOpen, onclose }: { isOpen: boolean, onclose: () => void }) {
     const [course, setCourse] = useState({
@@ -68,16 +69,10 @@ function CreateCourseModal({ isOpen, onclose }: { isOpen: boolean, onclose: () =
                         className="w-full p-2 h-[150px] border rounded-xl border-slate-700"
                         required
                     />
-                    <label htmlFor="course_code">Course Duration</label>
-                    <Input
-                        type="text"
-                        id="course_duration"
-                        name="course_duration"
-                        placeholder="Course Duration. Eg. ( 6 months )"
-                        value={course.course_duration}
-                        onChange={handleChange}
-                        required
-                    />
+                    <label htmlFor="course_code">Course Duration</label><br />
+                    <DurationComponent 
+                    className="
+                    w-full px-2 py-4 border rounded-xl border-slate-700" />
                     <div className="flex justify-end space-x-2">
                         <button type="button" onClick={onclose} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">Cancel</button>
                         <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">Create</button>
