@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import App from "../App";
 import Dashboard from "../pages/Dashboard";
-import Courses from "../pages/Explore";
 import Login from "../pages/Login";
 import RoleBasedRoute from "./RoleBasedRoute";
 import Explore from "../pages/Explore";

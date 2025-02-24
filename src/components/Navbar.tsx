@@ -12,7 +12,7 @@ const Navbar = ({ onSidebarToggle }: { onSidebarToggle: () => void }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 shadow-xs z-50 bg-white flex items-center px-6 justify-between">
+    <header className="fixed top-0 left-0 right-0 h-16 shadow-sm z-50 bg-white flex items-center px-6 justify-between">
       {/* Sidebar Toggle Button (Mobile) */}
       <button onClick={onSidebarToggle} className="md:hidden">
         <Menu className="w-6 h-6 text-gray-600" />
