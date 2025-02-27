@@ -1,22 +1,29 @@
 import { useState } from "react";
 import DurationComponent from "../DurationComponent";
 import { BASEURL } from "../../constants";
-import { useAuth } from "../../context/AuthProvider";
-import { User } from "../../types/user";
 import Course from "../../types/course";
 
-function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolean, onclose: () => void, setCoursesCall: (course: Course) => void }) {
-    const {getUser} = useAuth();
-    const user: User | null = getUser();
-    const instructor: string = `${user?.firstname} ${user?.lastname}`;
-
+function EditCourseModal(
+    {
+        isOpen,
+        onclose,
+        setCoursesCall,
+        course_data
+    }:
+        {
+            isOpen: boolean,
+            onclose: () => void,
+            setCoursesCall: (course: Course) => void,
+            course_data: Course | null
+        }
+) {
     const [course, setCourse] = useState({
-        _id: "",
-        course_code: "",
-        course_name: "",
-        course_description: "",
-        course_instructor: instructor,
-        course_duration: "",
+        _id: course_data ? course_data._id : "",
+        course_code: course_data ? course_data.course_code : "",
+        course_name: course_data ? course_data.course_name : "",
+        course_description: course_data ? course_data.course_description : "",
+        course_instructor: course_data ? course_data.course_instructor : "",
+        course_duration: course_data ? course_data.course_duration : "",
     });
 
     const handleChange = (e: any) => {
@@ -28,16 +35,15 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
         e.preventDefault();
 
         if (
-            !course.course_code || 
-            !course.course_name || 
+            !course.course_code ||
+            !course.course_name ||
             !course.course_description
-        ) 
-            {
+        ) {
             alert("Please fill in all fields");
             return;
         }
-        
-        if(!course.course_instructor) {
+
+        if (!course.course_instructor) {
             alert("Course Instructor is not set");
             return;
         }
@@ -46,7 +52,7 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
 
 
         const response: Response = await fetch(
-            `${BASEURL}courses`,
+            `${BASEURL}courses/edit?id=${course_data?._id}`,
             {
                 method: "POST",
                 headers: {
@@ -56,17 +62,26 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
             }
         )
 
-        const newCourse:Course = await response.json();
+        const newCourse: Course = await response.json();
         console.log("New Course:", newCourse);
         setCoursesCall(newCourse);
 
         onclose();
     };
 
+    const handleModalBackgroundClicked = (e: any) => {
+        if (e.target.id === "edit-modal-background") {
+            onclose();
+        }
+    }
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#1c1c1c7b]  z-50 px-2">
+        <div 
+        id="edit-modal-background" 
+        className="fixed inset-0 flex items-center justify-center bg-[#1c1c1c7b]  z-50 px-2"
+        onClick={handleModalBackgroundClicked}>
             <div className="bg-white  p-6 rounded-xl shadow-lg w-full max-w-xl">
                 <form onSubmit={handleSubmit} className="space-y-2 bg-white">
                     <h2 className="text-xl text-center font-semibold text-black mb-4">Create a new Course</h2>
@@ -103,13 +118,13 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
                     />
                     <label htmlFor="course_duration">Course Duration</label><br />
                     <DurationComponent
-                    field_name="course_duration"
-                    onChangeHandler={handleChange}
-                    className="
+                        field_name="course_duration"
+                        onChangeHandler={handleChange}
+                        className="
                     w-full px-2 py-4 border rounded-xl border-slate-700" />
                     <div className="flex justify-end space-x-2">
                         <button type="button" onClick={onclose} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">Create</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-400 text-white rounded hover:bg-blue-700 cursor-pointer">Update</button>
                     </div>
                 </form>
             </div>
@@ -132,4 +147,4 @@ const Input = ({ type, id, name, placeholder, value, onChange, required }: { typ
     );
 };
 
-export default CreateCourseModal
+export default EditCourseModal

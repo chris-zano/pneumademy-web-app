@@ -3,36 +3,23 @@ import CourseCard from "../components/CourseCard";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import landinPageImage from '../assets/images/landing_page_image.webp'
+import { useEffect, useState } from "react";
+import { getCourses } from "../api/courses";
+import Course from "../types/course";
 const Dashboard = () => {
   const { user } = useAuth();
   const isInstructor = user?.role === "instructor";
+  const [courses, setCourses] = useState<Course[]>([]);
 
-  const courses = [
-    {
-      id: "1",
-      title: "React for Beginners",
-      description: "Learn React from scratch and build interactive UIs.",
-      instructor: "John Doe",
-      banner: landinPageImage,
-      progress: 45,
-    },
-    {
-      id: "2",
-      title: "Advanced TypeScript",
-      description: "Master TypeScript and improve your development workflow.",
-      instructor: "Jane Smith",
-      banner: landinPageImage,
-      progress: 80,
-    },
-    {
-      id: "3",
-      title: "Advanced Tailwinf",
-      description: "Master Tailwind and improve your development workflow.",
-      instructor: "Emily Doeth",
-      banner: landinPageImage,
-      progress: 80,
-    },
-  ];
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      const data = await getCourses();
+      setCourses(data);
+    }
+
+    fetchCourses();
+  }, []);
 
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4">
@@ -44,13 +31,12 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:flex gap-4 flex-wrap">
             {courses && courses.map((course, index) => (
               <CourseCard
-                id={course.id}
+                id={course._id}
                 key={index}
-                title={course.title}
-                description={course.description}
-                instructor={course.instructor}
-                banner={course.banner}
-                progress={course.progress}
+                title={course.course_name}
+                description={course.course_description}
+                instructor={course.course_instructor}
+                progress={30}
               />
             ))}
           </div>
