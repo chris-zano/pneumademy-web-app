@@ -2,6 +2,7 @@ import { useState } from "react";
 import DurationComponent from "../DurationComponent";
 import { BASEURL } from "../../constants";
 import Course from "../../types/course";
+import LoadingSpinnerCard from "./LoadingSpinnerCard";
 
 function EditCourseModal(
     {
@@ -26,6 +27,8 @@ function EditCourseModal(
         course_duration: course_data ? course_data.course_duration : "",
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const handleChange = (e: any) => {
         const { name, value } = e.target;
         setCourse((prev: Course) => ({ ...prev, [name]: value }));
@@ -48,8 +51,7 @@ function EditCourseModal(
             return;
         }
 
-        console.log("Course Data:", course);
-
+        setIsLoading(true);
 
         const response: Response = await fetch(
             `${BASEURL}courses/edit?id=${course_data?._id}`,
@@ -63,8 +65,8 @@ function EditCourseModal(
         )
 
         const newCourse: Course = await response.json();
-        console.log("New Course:", newCourse);
         setCoursesCall(newCourse);
+        setIsLoading(false);
 
         onclose();
     };
@@ -76,6 +78,12 @@ function EditCourseModal(
     }
 
     if (!isOpen) return null;
+
+    if (isLoading) {
+        return (
+            <LoadingSpinnerCard />
+        )
+    }
 
     return (
         <div 

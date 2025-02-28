@@ -3,11 +3,14 @@ import { useParams } from "react-router-dom";
 import { getCourse, getCourseLessons } from "../api/courses";
 import Course from "../types/course";
 import { useAuth } from "../context/AuthProvider";
-import { PenIcon, Plus } from "lucide-react";
+import { Delete, DeleteIcon, PenIcon, Plus, Trash } from "lucide-react";
 import Lesson, { ContentType } from "../types/lesson";
 import EditCourseModal from "../components/modals/EditCourseModal";
 import AddLessonModal from "../components/modals/AddLessonModal";
+import GoogleViewModal from "../components/modals/GoogleViewModal";
 import { FaFilePdf, FaFileImage, FaFilePowerpoint, FaFileVideo, FaFileWord, FaFileAudio } from 'react-icons/fa';
+import { BASEURL } from "../constants";
+import LoadingSpinnerCard from "../components/modals/LoadingSpinnerCard";
 
 
 function CourseDetails() {
@@ -15,6 +18,7 @@ function CourseDetails() {
   const { id } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [
     createCourseModalIsOpen, setcreateCourseModalIsOpen
@@ -25,6 +29,10 @@ function CourseDetails() {
 
   const [courseBtnIsActive, setCourseBtnIsActive] = useState<boolean>(false);
   const [FilterModalIsActive, setFilterModalIsActive] = useState<boolean>(false);
+
+  const [isGoogleOpen, setIsGoogleOpen] = useState(false);
+
+  const [fileUrl, setFileUrl] = useState("");
 
 
 
@@ -47,20 +55,45 @@ function CourseDetails() {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     const getLessons = async (id: string) => {
       const data: Lesson[] = await getCourseLessons(id);
-      setLessons(data);
       console.log(data);
+      setLessons(data);
+      setIsLoading(false);
     }
 
     getLessons(id as string);
   }, []);
 
-  const updateLessonsListOnPage = () => {
-
-    console.log({ update_lessons_list: "Function has been called" })
+  const updateLessonsListOnPage = (lesson: Lesson) => {
+    lessons.push(lesson);
+    setLessons([...lessons]);
   }
 
+  const updateFileUrl = (lesson: Lesson) => {
+    const fileType = lesson.content_type;
+    console.log({ fileType });
+    setFileUrl(lesson.content);
+    setIsGoogleOpen(true);
+
+  }
+
+  const handleDeleteLesson = async (lesson: Lesson) => {
+    setIsLoading(true);
+    const response = await fetch(
+      `${BASEURL}lessons/${lesson._id}`,
+      {
+        method: "DELETE",
+      });
+
+    if (response.ok) {
+      const newLessons = lessons.filter((l) => l._id !== lesson._id);
+      console.log(newLessons);
+      setLessons(newLessons);
+    }
+    setIsLoading(false);
+  }
 
   const getFileIcon = (contentType: ContentType) => {
     switch (contentType) {
@@ -81,6 +114,12 @@ function CourseDetails() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <LoadingSpinnerCard />
+    )
+  }
+
 
   return (
     <>
@@ -88,7 +127,9 @@ function CourseDetails() {
       <EditCourseModal
         isOpen={createCourseModalIsOpen}
         onclose={showCreateCourseModal}
-        setCoursesCall={() => { }}
+        setCoursesCall={(course: Course) => { 
+          setCourse(course);
+        }}
         course_data={course}
         key={course?._id} />
       <AddLessonModal
@@ -96,8 +137,12 @@ function CourseDetails() {
         onClose={showFilterModal}
         setLessonsCall={updateLessonsListOnPage}
         key={0}
-        course_id={id} />
-
+        course_id={id!} />
+      <GoogleViewModal
+        isOpen={isGoogleOpen}
+        onClose={() => setIsGoogleOpen(false)}
+        fileUrl={fileUrl}
+      />
       {
         user?.role === "instructor" &&
         <section
@@ -128,7 +173,7 @@ function CourseDetails() {
 
       {
         course &&
-        <div className="flex flex-col p-2 w-[70%] space-y-2">
+        <div className="flex flex-col p-2 w-full md:w-[70%] space-y-2">
 
           <h1 className="text-2xl font-bold">{course.course_name}</h1>
           <p className="text-gray-500">{course.course_description}</p>
@@ -150,13 +195,30 @@ function CourseDetails() {
                 <p className="text-gray-500">No lessons yet</p>
                 :
                 lessons.map((lesson) => (
-                  <details key={lesson._id} className="flex flex-col p-4 border border-slate-200 rounded-lg cursor-pointer">
-                    <summary>{lesson.title}</summary>
+                  <details key={lesson._id} className="flex flex-col mb-2 p-4 border border-slate-200 rounded-lg cursor-pointer">
+                    <summary className="flex justify-between">
+                      <h3 className="text-lg font-semibold">{lesson.title}</h3>
+                      {
+                        user?.role === "instructor" &&
+                        <p
+                          className="text-gray-500 hover:text-red-500"
+                          onClick={() => {
+                            const confirmation = window.confirm("Are you sure you want to delete this lesson?");
+                            if (confirmation) {
+                              handleDeleteLesson(lesson);
+                            }
+                          }}>
+                          <Trash />
+                        </p>
+                      }
+                    </summary>
                     <article
                       className="flex text-lg py-2 px-5 items-center gap-3"
-                      onClick={() => {}}>
+                      onClick={() => { }}>
                       {getFileIcon(lesson.content_type)}
-                      <p className="text-gray-500">
+                      <p className="text-gray-500" onClick={() => {
+                        updateFileUrl(lesson);
+                      }}>
                         {lesson.title} [ {lesson.content_type} ]
                       </p>
                     </article>
