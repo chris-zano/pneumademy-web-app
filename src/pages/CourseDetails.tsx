@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { getCourse, getCourseLessons } from "../api/courses";
 import Course from "../types/course";
 import { useAuth } from "../context/AuthProvider";
-import { Delete, DeleteIcon, PenIcon, Plus, Trash } from "lucide-react";
+import { PenIcon, Plus, Trash } from "lucide-react";
 import Lesson, { ContentType } from "../types/lesson";
 import EditCourseModal from "../components/modals/EditCourseModal";
 import AddLessonModal from "../components/modals/AddLessonModal";

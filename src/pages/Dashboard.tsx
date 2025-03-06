@@ -2,7 +2,6 @@ import Calendar from "../components/Calendar";
 import CourseCard from "../components/CourseCard";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
-import landinPageImage from '../assets/images/landing_page_image.webp'
 import { useEffect, useState } from "react";
 import { getCourses } from "../api/courses";
 import Course from "../types/course";

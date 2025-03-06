@@ -1,8 +1,8 @@
-import { FormEvent, JSX } from "react"
+import {  JSX } from "react"
 
 function FilterModal({ title, options, isOpen, onclose }: { title: string, options: JSX.Element[], isOpen: boolean, onclose: () => void }) {
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+    function handleSubmit(): void {
         throw new Error("Function not implemented.");
     }
 
