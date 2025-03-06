@@ -92,7 +92,7 @@ function EditCourseModal(
         onClick={handleModalBackgroundClicked}>
             <div className="bg-white  p-6 rounded-xl shadow-lg w-full max-w-xl">
                 <form onSubmit={handleSubmit} className="space-y-2 bg-white">
-                    <h2 className="text-xl text-center font-semibold text-black mb-4">Create a new Course</h2>
+                    <h2 className="text-xl text-center font-semibold text-black mb-4">Add a new Lesson</h2>
 
                     <label htmlFor="course_code">Course Code</label>
                     <Input

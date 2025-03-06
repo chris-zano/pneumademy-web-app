@@ -159,12 +159,12 @@ function CourseDetails() {
             <ActionButton
               icon={<Plus />}
               text="Add Lesson"
-              isActive={false}
+              isActive={filterModalIsOpen}
               onclickHandler={showFilterModal} />
             <ActionButton
               icon={<PenIcon />}
               text="Edit"
-              isActive={false}
+              isActive={courseBtnIsActive}
               onclickHandler={showCreateCourseModal} />
 
           </nav>
