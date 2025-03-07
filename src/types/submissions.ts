@@ -13,6 +13,7 @@ export interface IUserSubmission {
 }
 
 interface ISubmission {
+    _id: string;
     course_id: string;
     lesson_id?: string | null;
     title: string;
