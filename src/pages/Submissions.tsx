@@ -6,7 +6,8 @@ import ISubmission, { IUserSubmission } from "../types/submissions";
 import { formatDate } from "date-fns"
 import ListSubmissionsModal from "../components/modals/ListSubmissionsModal";
 import AddSubmissionModal from "../components/modals/AddSubmissionModal";
-
+import { BASEURL } from "../constants";
+import Course from "../types/course";
 
 
 function Submissions() {
@@ -27,7 +28,7 @@ function Submissions() {
     submissionModalIsOpen, setSubmissionModalIsOpen
   ] = useState<boolean>(false);
   const [
-    addAubmissionModalIsOpen, setAddSubmissionModalIsOpen
+    addSubmissionModalIsOpen, setAddSubmissionModalIsOpen
   ] = useState<boolean>(false);
 
   const [courseBtnIsActive, setCourseBtnIsActive] = useState<boolean>(false);
@@ -49,15 +50,51 @@ function Submissions() {
   }
   const showAddSubmissionCourseModal = () => {
     setAddSubmissionModalIsActive(!addSubmissionModalIsActive);
-    setAddSubmissionModalIsOpen(!addAubmissionModalIsOpen);
+    setAddSubmissionModalIsOpen(!addSubmissionModalIsOpen);
+  }
+
+
+  const getInstructorCourses = async () => {
+    try {
+      const response = await fetch(`${BASEURL}courses`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      const data = await response.json();
+      const instructorCourses = data.filter((course: Course) => course.course_instructor === `${user?.firstname} ${user?.lastname}`);
+      console.log({instructorCourses})
+      return instructorCourses;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const listAllSubmissions = async () => {
     setIsLoading(true);
+    const instructorCourses = await getInstructorCourses();
     try {
-      const response = await fetch("http://localhost:8080/submissions");
-      const data = await response.json();
-      setSubmissions(data);
+
+      if (user?.role === "instructor") {  
+        const response = await fetch(`${BASEURL}submissions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            course_ids: instructorCourses.map((course: Course) => course._id)
+          })
+        });
+        const data = await response.json();
+        console.log({data})
+        setSubmissions(data);
+      } else {
+        const response = await fetch(`${BASEURL}submissions?user_id=${user?.id}`);
+        const data = await response.json();
+        console.log({data})
+        setSubmissions(data);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -187,7 +224,7 @@ function Submissions() {
         user?.role === "learner" &&
         <>
         <AddSubmissionModal 
-        isOpen={addAubmissionModalIsOpen}
+        isOpen={addSubmissionModalIsOpen}
         onclose={showAddSubmissionCourseModal}
         submission_id={submission_id}
         submission_data={submission_context!}

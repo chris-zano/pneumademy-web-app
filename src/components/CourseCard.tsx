@@ -1,6 +1,9 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import courseBanner from '../assets/images/course-image.png';
+import { BASEURL } from "../constants";
+import Course from "../types/course";
+
 
 interface CourseCardProps {
   id: string;
@@ -8,9 +11,14 @@ interface CourseCardProps {
   description: string;
   instructor: string;
   progress: number;
+  showProgress?: boolean;
+  checkLearnerIsEnrolled?: boolean;
+  learnerEnrollments?: Course[];
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ id, title, description, instructor, progress }) => {
+const CourseCard: React.FC<CourseCardProps> = (
+  { id, title, description, instructor, progress, showProgress = false, checkLearnerIsEnrolled = false, learnerEnrollments = [] }
+) => {
   const { user } = useAuth();
 
   const colorPool = [
@@ -42,9 +50,40 @@ const CourseCard: React.FC<CourseCardProps> = ({ id, title, description, instruc
     return shuffledColors.pop();
   };
 
+  const enrollLearnerInCourse = async (course_id: string, learner_id: string) => {
+    const response = await fetch(`${BASEURL}enrollments`, {
+      method: 'POST',
+      body: JSON.stringify({ learner_id, course_id }),
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    return response.json();
+  }
+
+
+  const handleEnroll = (e: any) => {
+    if (!user) {
+      alert('Please login to enroll in a course');
+      return;
+    }
+    if (checkLearnerIsEnrolled && learnerEnrollments.length > 0 && learnerEnrollments.find((enrollment) => enrollment._id === id)) {
+      return;
+    }
+    e.preventDefault();
+
+    const proceed = confirm('Are you sure you want to enroll in this course?');
+    if (proceed) {
+      enrollLearnerInCourse(id, user?.id).then(() => {
+        window.location.reload();
+      });
+    }
+  }
+
+
 
   return (
-    <NavLink to={`/courses/${id}`} className="block w-[320px] h-[320px]">
+    <NavLink to={`/courses/${id}`} className="block w-[320px] h-[320px]" onClick={user?.role === 'learner' ? handleEnroll : () => {}}>
       <div className="bg-white h-[100%] rounded-lg shadow-md overflow-hidden transition hover:shadow-lg">
         {/* Course Banner */}
         <img src={courseBanner} alt={title} className={`w-full h-40  object-cover ${randomColor()}`} />
@@ -60,15 +99,22 @@ const CourseCard: React.FC<CourseCardProps> = ({ id, title, description, instruc
           </p>
 
           {/* Progress Bar */}
-          <div className={user?.role === "instructor" ? `hidden` : user?.role === "student" ? `mt-3` : `mt-3`}>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="h-2 bg-blue-600 rounded-full"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-1">{progress}% Completed</p>
-          </div>
+          {
+            showProgress &&
+            learnerEnrollments.length > 0 &&
+            learnerEnrollments.find((enrollment) => enrollment._id === id) &&
+            (
+              <div className="mt-3">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 bg-blue-600 rounded-full"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{progress}% Completed</p>
+              </div>
+            )
+          }
         </div>
       </div>
     </NavLink>

@@ -5,20 +5,80 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCourses } from "../api/courses";
 import Course from "../types/course";
+import LoadingSpinnerCard from "../components/modals/LoadingSpinnerCard";
+import { BASEURL } from "../constants";
+import { getTotalCourses, getTotalLearners } from "../api/dashboard";
+
+
 const Dashboard = () => {
+
+  const [totalCourses, setTotalCourses] = useState(0);
+  const [totalLearners, setTotalLearners] = useState(0);
+
   const { user } = useAuth();
   const isInstructor = user?.role === "instructor";
+  const isLearner = user?.role === "learner";
+  const [isLoading, setIsLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [enrollments, setEnrollments] = useState<Course[]>([]);
 
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      const data = await getCourses();
-      setCourses(data);
-    }
 
-    fetchCourses();
-  }, []);
+  const getLearnerEnrollments = async () => {
+
+    const response = await fetch(
+      `${BASEURL}enrollments?id=${user?.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+
+    const data = await response.json();
+    return data;
+  }
+
+  if (isLoading) {
+    return (
+      <LoadingSpinnerCard />
+    )
+  }
+
+  if (isLearner) {
+    useEffect(() => {
+      setIsLoading(true);
+      const fetchEnrollments = async () => {
+        const data = await getLearnerEnrollments();
+        setEnrollments(data);
+      }
+      fetchEnrollments();
+      setIsLoading(false);
+    }, []);
+  }
+
+  if (isInstructor) {
+    useEffect(() => {
+      setIsLoading(true);
+      const fetchCourses = async () => {
+        const data = await getCourses();
+        setCourses(data);
+      }
+      const fetchTotalCourses = async () => {
+        const data = await getTotalCourses();
+        setTotalCourses(data);
+      }
+      const fetchTotalLearners = async () => {
+        const data = await getTotalLearners();
+        setTotalLearners(data);
+      }
+      fetchCourses();
+      fetchTotalCourses();
+      fetchTotalLearners();
+      setIsLoading(false);
+    }, []);
+  }
 
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4">
@@ -28,7 +88,7 @@ const Dashboard = () => {
         <section className="bg-white p-4 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">Enrolled Courses</h2>
           <div className="grid grid-cols-1 md:flex gap-4 flex-wrap">
-            {courses && courses.map((course, index) => (
+            {isInstructor ? courses.map((course, index) => (
               <CourseCard
                 id={course._id}
                 key={index}
@@ -36,6 +96,18 @@ const Dashboard = () => {
                 description={course.course_description}
                 instructor={course.course_instructor}
                 progress={30}
+              />
+            )) : enrollments.map((enrollment, index) => (
+              <CourseCard
+                id={enrollment._id}
+                key={index}
+                title={enrollment.course_name}
+                description={enrollment.course_description}
+                instructor={enrollment.course_instructor}
+                progress={30}
+                showProgress={true}
+                learnerEnrollments={enrollments}
+                checkLearnerIsEnrolled={true}
               />
             ))}
           </div>
@@ -47,8 +119,8 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold mb-4">Statistics</h2>
           {isInstructor ? (
             <div className="grid grid-cols-2 gap-4">
-              <StatCard title="Total Students" value="120" />
-              <StatCard title="Courses Created" value="5" />
+              <StatCard title="Total Students" value={totalLearners.toString()} />
+              <StatCard title="Courses Created" value={totalCourses.toString()} />
               <StatCard title="Average Quiz Score" value="85%" />
               <StatCard title="Assignments Graded" value="300" />
             </div>

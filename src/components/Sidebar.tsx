@@ -29,8 +29,8 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           <section className="flex flex-col gap-4">
             <SidebarItem to="/dashboard" icon={<LayoutDashboard />} text="Dashboard" onClose={onClose} />
             {
-              user?.role === "instructor" 
-              && 
+              user?.role === "instructor"
+              &&
               (
                 <SidebarItem to="/courses" icon={<Book />} text="Courses" onClose={onClose} />
               )
@@ -39,7 +39,10 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
               user?.role === "learner"
               &&
               (
-                <SidebarItem to="/enrollments" icon={<BookOpen />} text="Enrollments" onClose={onClose} />
+                <>
+                  <SidebarItem to="/courses" icon={<Book />} text="Courses" onClose={onClose} />
+
+                  <SidebarItem to="/enrollments" icon={<BookOpen />} text="Enrollments" onClose={onClose} /></>
               )
             }
             <SidebarItem to="/submissions" icon={<FileText />} text="Submissions" onClose={onClose} />

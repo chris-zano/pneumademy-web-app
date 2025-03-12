@@ -7,6 +7,7 @@ import DurationComponent from "../components/DurationComponent";
 import CourseCard from "../components/CourseCard";
 import Course from "../types/course";
 import { getCourses } from "../api/courses";
+import { BASEURL } from "../constants";
 
 function Explore() {
 
@@ -21,6 +22,7 @@ function Explore() {
   const [courseBtnIsActive, setCourseBtnIsActive] = useState<boolean>(false);
   const [FilterModalIsActive, setFilterModalIsActive] = useState<boolean>(false);
 
+  const [learnerEnrollments, setLearnerEnrollments] = useState<any[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
 
 
@@ -33,13 +35,24 @@ function Explore() {
     setcreateCourseModalIsOpen(!createCourseModalIsOpen);
   }
 
-  if (user?.role === "learner") {
-    window.location.replace("/dashboard");
-    return null;
-  }
-
   const handleUpdateCourseList = (course: Course): void => {
     courses.push(course);
+  }
+
+  const getLearnerEnrollments = async () => {
+
+    const response = await fetch(
+      `${BASEURL}enrollments?id=${user?.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+
+    const data = await response.json();
+    return data;
   }
 
   useEffect(() => {
@@ -49,46 +62,53 @@ function Explore() {
     }
 
     fetchCourses();
+
+    if (user?.role === "learner") {
+      getLearnerEnrollments().then((data) => {
+        setLearnerEnrollments(data);
+      });
+
+    }
+
   }, []);
 
   return (
     <>
-      <CreateCourseModal
-        isOpen={createCourseModalIsOpen}
-        onclose={showCreateCourseModal}
-        setCoursesCall={handleUpdateCourseList} />
-      <FilterModal
-        isOpen={filterModalIsOpen}
-        onclose={showFilterModal}
-        title="Filter Courses"
-        key="instructor"
-        options={[
-          <div className="flex flex-col space-y-1" key="difficulty">
-            <label htmlFor="difficulty" className="text-gray-700 font-medium">Difficulty</label>
-            <select name="difficulty" id="difficulty" className="p-2 border rounded-md ">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </div>,
-          <div className="flex flex-col space-y-1" key="category">
-            <label htmlFor="category" className="text-gray-700 font-medium">Category</label>
-            <select name="category" id="category" className="p-2 border rounded-md">
-              <option value="programming">Programming</option>
-              <option value="math">Math</option>
-              <option value="science">Science</option>
-            </select>
-          </div>,
-          <div className="flex flex-col space-y-1" key="duration">
-            <label htmlFor="duration" className="text-gray-700 font-medium">Duration</label>
-            <DurationComponent className="" field_name="duration" onChangeHandler={() => { }} />
-          </div>
-        ]}
-      />
-
       {
         user?.role === "instructor" && (
           <>
+            <CreateCourseModal
+              isOpen={createCourseModalIsOpen}
+              onclose={showCreateCourseModal}
+              setCoursesCall={handleUpdateCourseList} />
+            <FilterModal
+              isOpen={filterModalIsOpen}
+              onclose={showFilterModal}
+              title="Filter Courses"
+              key="instructor"
+              options={[
+                <div className="flex flex-col space-y-1" key="difficulty">
+                  <label htmlFor="difficulty" className="text-gray-700 font-medium">Difficulty</label>
+                  <select name="difficulty" id="difficulty" className="p-2 border rounded-md ">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>,
+                <div className="flex flex-col space-y-1" key="category">
+                  <label htmlFor="category" className="text-gray-700 font-medium">Category</label>
+                  <select name="category" id="category" className="p-2 border rounded-md">
+                    <option value="programming">Programming</option>
+                    <option value="math">Math</option>
+                    <option value="science">Science</option>
+                  </select>
+                </div>,
+                <div className="flex flex-col space-y-1" key="duration">
+                  <label htmlFor="duration" className="text-gray-700 font-medium">Duration</label>
+                  <DurationComponent className="" field_name="duration" onChangeHandler={() => { }} />
+                </div>
+              ]}
+            />
             <section
               className="
             w-full px-6 py-4 
@@ -122,25 +142,54 @@ function Explore() {
                 p-4
                 "
               >
-                { courses.length === 0 ? 
+                {courses.length === 0 ?
                   <div className="w-full flex justify-center items-center">
                     <p className="text-gray-500">No courses found</p>
                   </div>
-                 : courses.map((course) => (
-                  <li key={course?._id} className="m-2">
-                    <CourseCard
-                      id={course?._id}
-                      title={course?.course_name}
-                      description={course?.course_description}
-                      instructor={course?.course_instructor}
-                      progress={20}
-                    />
-                  </li>
-                ))}
+                  : courses.map((course) => (
+                    <li key={course?._id} className="m-2">
+                      <CourseCard
+                        id={course?._id}
+                        title={course?.course_name}
+                        description={course?.course_description}
+                        instructor={course?.course_instructor}
+                        progress={20}
+                      />
+                    </li>
+                  ))}
               </ul>
             </section>
           </>
 
+        )
+      }
+
+      {
+        user?.role === "learner" && (
+          <section>
+            <ul
+              className="
+                w-full
+                flex flex-wrap
+                p-4
+                "
+            >
+              {courses.map((course) => (
+                <li key={course?._id} className="m-2">
+                  <CourseCard
+                    id={course?._id}
+                    title={course?.course_name}
+                    description={course?.course_description}
+                    instructor={course?.course_instructor}
+                    progress={20}
+                    checkLearnerIsEnrolled={true}
+                    showProgress={true}
+                    learnerEnrollments={learnerEnrollments}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
         )
       }
     </>

@@ -11,8 +11,9 @@ import GoogleViewModal from "../components/modals/GoogleViewModal";
 import { FaFilePdf, FaFileImage, FaFilePowerpoint, FaFileVideo, FaFileWord, FaFileAudio } from 'react-icons/fa';
 import { BASEURL } from "../constants";
 import LoadingSpinnerCard from "../components/modals/LoadingSpinnerCard";
-
-
+import VideoViewModal from "../components/modals/VideoViewModal";
+import AudioViewModal from "../components/modals/AudioViewModal";
+import ImageViewModal from "../components/modals/ImageViewModal";
 function CourseDetails() {
   const { user } = useAuth();
   const { id } = useParams();
@@ -31,7 +32,9 @@ function CourseDetails() {
   const [FilterModalIsActive, setFilterModalIsActive] = useState<boolean>(false);
 
   const [isGoogleOpen, setIsGoogleOpen] = useState(false);
-
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [isAudioOpen, setIsAudioOpen] = useState(false);
+  const [isImageOpen, setIsImageOpen] = useState(false);
   const [fileUrl, setFileUrl] = useState("");
 
 
@@ -73,9 +76,22 @@ function CourseDetails() {
 
   const updateFileUrl = (lesson: Lesson) => {
     const fileType = lesson.content_type;
-    console.log({ fileType });
-    setFileUrl(lesson.content);
-    setIsGoogleOpen(true);
+    if (fileType === ContentType.Video) {
+      setFileUrl(lesson.content);
+      setIsVideoOpen(true);
+    }
+    else if (fileType === ContentType.Audio) {
+      setFileUrl(lesson.content);
+      setIsAudioOpen(true);
+    }
+    else if (fileType === ContentType.Image) {
+      setFileUrl(lesson.content);
+      setIsImageOpen(true);
+    }
+    else {
+      setFileUrl(lesson.content);
+      setIsGoogleOpen(true);
+    }
 
   }
 
@@ -141,6 +157,21 @@ function CourseDetails() {
       <GoogleViewModal
         isOpen={isGoogleOpen}
         onClose={() => setIsGoogleOpen(false)}
+        fileUrl={fileUrl}
+      />
+      <VideoViewModal
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+        fileUrl={fileUrl}
+      />
+      <AudioViewModal
+        isOpen={isAudioOpen}
+        onClose={() => setIsAudioOpen(false)}
+        fileUrl={fileUrl}
+      />
+      <ImageViewModal
+        isOpen={isImageOpen}
+        onClose={() => setIsImageOpen(false)}
         fileUrl={fileUrl}
       />
       {
@@ -216,7 +247,8 @@ function CourseDetails() {
                       className="flex text-lg py-2 px-5 items-center gap-3"
                       onClick={() => { }}>
                       {getFileIcon(lesson.content_type)}
-                      <p className="text-gray-500" onClick={() => {
+                      <p className="text-gray-500" 
+                      onClick={() => {
                         updateFileUrl(lesson);
                       }}>
                         {lesson.title} [ {lesson.content_type} ]
