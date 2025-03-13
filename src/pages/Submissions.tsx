@@ -64,19 +64,38 @@ function Submissions() {
       });
       const data = await response.json();
       const instructorCourses = data.filter((course: Course) => course.course_instructor === `${user?.firstname} ${user?.lastname}`);
-      console.log({instructorCourses})
+      console.log({ instructorCourses })
       return instructorCourses;
     } catch (error) {
       console.error(error);
     }
   }
 
+  const getLearnerEnrollments = async () => {
+
+    const response = await fetch(
+      `${BASEURL}enrollments?id=${user?.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+
+    const data = await response.json();
+    return data;
+  }
+
+
+
   const listAllSubmissions = async () => {
     setIsLoading(true);
-    const instructorCourses = await getInstructorCourses();
     try {
 
-      if (user?.role === "instructor") {  
+      if (user?.role === "instructor") {
+        const instructorCourses = await getInstructorCourses();
+
         const response = await fetch(`${BASEURL}submissions`, {
           method: "POST",
           headers: {
@@ -87,12 +106,19 @@ function Submissions() {
           })
         });
         const data = await response.json();
-        console.log({data})
         setSubmissions(data);
       } else {
-        const response = await fetch(`${BASEURL}submissions?user_id=${user?.id}`);
+        const learnerEnrollments = await getLearnerEnrollments();
+        const response = await fetch(`${BASEURL}submissions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            course_ids: learnerEnrollments.map((enrollment: Course) => enrollment._id)
+          })
+        });
         const data = await response.json();
-        console.log({data})
         setSubmissions(data);
       }
     } catch (error) {
@@ -223,13 +249,13 @@ function Submissions() {
       {
         user?.role === "learner" &&
         <>
-        <AddSubmissionModal 
-        isOpen={addSubmissionModalIsOpen}
-        onclose={showAddSubmissionCourseModal}
-        submission_id={submission_id}
-        submission_data={submission_context!}
-        user={user}
-        />
+          <AddSubmissionModal
+            isOpen={addSubmissionModalIsOpen}
+            onclose={showAddSubmissionCourseModal}
+            submission_id={submission_id}
+            submission_data={submission_context!}
+            user={user}
+          />
           <section
             className="
           w-full px-6 py-4 

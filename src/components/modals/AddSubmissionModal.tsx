@@ -2,6 +2,7 @@ import { useState } from "react";
 import ISubmission from "../../types/submissions"
 import { BASEURL } from "../../constants";
 import { User } from "../../types/user";
+import LoadingSpinnerCard from "./LoadingSpinnerCard";
 
 function AddSubmissionModal(
     {
@@ -21,20 +22,15 @@ function AddSubmissionModal(
 
     if (!isOpen) return null;
     const [file, setFile] = useState<File | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleFileChange = (e: any) => {
         setFile(e.target.files[0]);
     };
 
-    const handleModalBackgroundClicked = (e: any) => {
-        if (e.target.id === "addSubmissions-modal-background") {
-            onclose();
-        }
-    }
-
-    const handleSubmit = async (e:any) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
-
+        setIsLoading(true);
         try {
             const formData = new FormData();
             console.log(file);
@@ -50,6 +46,7 @@ function AddSubmissionModal(
             });
 
             await response.json();
+            setIsLoading(false);
             onclose();
 
 
@@ -59,6 +56,15 @@ function AddSubmissionModal(
         }
     }
 
+    if (isLoading) {
+        return <LoadingSpinnerCard />
+    }   
+
+    const handleModalBackgroundClicked = (e: any) => {
+        if (e.target.id === "listAllSubmissions-modal-background") {
+            onclose();
+        }
+    }
     return (
         <div
             id="listAllSubmissions-modal-background"
@@ -66,7 +72,7 @@ function AddSubmissionModal(
             onClick={handleModalBackgroundClicked}>
 
             <div className="bg-white  p-6 rounded-xl shadow-lg w-full max-w-xl">
-                <form  method="post" encType="multipart/form-data" onSubmit={handleSubmit} className="space-y-2 bg-white">
+                <form method="post" encType="multipart/form-data" onSubmit={handleSubmit} className="space-y-2 bg-white">
                     <h2
                         className="text-xl text-center font-semibold text-black mb-4">
                         <span className="block">{"Add Submission"}</span>

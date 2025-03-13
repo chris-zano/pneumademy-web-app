@@ -20,7 +20,7 @@ const Navbar = ({ onSidebarToggle }: { onSidebarToggle: () => void }) => {
 
       {/* Logo + Title */}
       <div className="flex items-center gap-2">
-        <span className="text-lg font-bold hidden md:block md:text-2xl">📚 Pneumademy</span>
+        <span className="text-lg font poppins-regular hidden md:block md:text-2xl">📚 Pn</span>
       </div>
 
       {/* Right Icons */}

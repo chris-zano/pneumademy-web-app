@@ -6,6 +6,7 @@ import { useAuth } from "./context/AuthProvider";
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { getUser } = useAuth()
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,13 +28,13 @@ const App = () => {
   return (
     <div className="flex">
       {/* Sidebar (Pass down state control) */}
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} updateIsCollapsed={setIsCollapsed} isCollapsed={isCollapsed} />
 
       <div className="flex flex-col flex-1">
         {/* Navbar (Pass toggle function) */}
         <Navbar onSidebarToggle={() => setIsSidebarOpen(true)} />
 
-        <main className=" w-full pt-16 md:pl-64 md:pt-16">
+        <main className={` w-full pt-16 ${isCollapsed ? "md:pl-18" : "md:pl-64"} md:pt-16`}>
           <Outlet />
         </main>
       </div>
