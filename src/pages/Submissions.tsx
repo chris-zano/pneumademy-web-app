@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { JSX, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthProvider";
 import { Settings2Icon, Plus } from "lucide-react";
@@ -11,7 +12,7 @@ import Course from "../types/course";
 
 
 function Submissions() {
-  const { user } = useAuth();
+  const { user, getHeaders } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [submissions, setSubmissions] = useState<ISubmission[]>([]);
   const [submissionData, setSubmissionData] = useState<IUserSubmission[]>([]);
@@ -53,88 +54,87 @@ function Submissions() {
     setAddSubmissionModalIsOpen(!addSubmissionModalIsOpen);
   }
 
-
-  const getInstructorCourses = async () => {
-    try {
-      const response = await fetch(`${BASEURL}courses`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        }
-      });
-      const data = await response.json();
-      const instructorCourses = data.filter((course: Course) => course.course_instructor === `${user?.firstname} ${user?.lastname}`);
-      console.log({ instructorCourses })
-      return instructorCourses;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  const getLearnerEnrollments = async () => {
-
-    const response = await fetch(
-      `${BASEURL}enrollments?id=${user?.id}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
-
-    const data = await response.json();
-    return data;
-  }
-
-
-
-  const listAllSubmissions = async () => {
-    setIsLoading(true);
-    try {
-
-      if (user?.role === "instructor") {
-        const instructorCourses = await getInstructorCourses();
-
-        const response = await fetch(`${BASEURL}submissions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            course_ids: instructorCourses.map((course: Course) => course._id)
-          })
-        });
-        const data = await response.json();
-        setSubmissions(data);
-      } else {
-        const learnerEnrollments = await getLearnerEnrollments();
-        const response = await fetch(`${BASEURL}submissions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            course_ids: learnerEnrollments.map((enrollment: Course) => enrollment._id)
-          })
-        });
-        const data = await response.json();
-        setSubmissions(data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    setIsLoading(false);
-  }
-
   const convertDateToString = (date: Date) => {
     if (!date) return date;
     return formatDate(date, "PPPP");
   }
 
   useEffect(() => {
+    
+    const getInstructorCourses = async () => {
+      try {
+        const _headers = await getHeaders()
+        const response = await fetch(`${BASEURL}courses`, {
+          method: "GET",
+          headers: _headers
+        });
+        const data = await response.json();
+        const instructorCourses = data.filter((course: Course) => course.course_instructor === `${user?.firstname} ${user?.lastname}`);
+        return instructorCourses;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    const getLearnerEnrollments = async () => {
+      const _headers = await getHeaders()
+      const response = await fetch(
+        `${BASEURL}enrollments?id=${user?.id}`,
+        {
+          method: "GET",
+          headers: _headers
+        }
+      )
+
+      const data = await response.json();
+      return data;
+    }
+
+    const listAllSubmissions = async () => {
+
+      setIsLoading(true);
+
+      try {
+        const _headers = await getHeaders()
+
+        if (user?.role === "instructor") {
+          const instructorCourses = await getInstructorCourses();
+
+          const response = await fetch(`${BASEURL}submissions`, {
+            method: "POST",
+            headers: _headers,
+            body: JSON.stringify({
+              course_ids: instructorCourses.map((course: Course) => course._id)
+            })
+          });
+          const data = await response.json();
+          setSubmissions(data);
+        }
+        
+        else {
+
+          const learnerEnrollments = await getLearnerEnrollments();
+          const response = await fetch(`${BASEURL}submissions`, {
+            method: "POST",
+            headers: _headers,
+            body: JSON.stringify({
+              course_ids: learnerEnrollments.map((enrollment: Course) => enrollment._id)
+            })
+          });
+          const data = await response.json();
+          setSubmissions(data);
+
+        }
+      } 
+      catch (error) {
+        console.error(error);
+      }
+
+      setIsLoading(false);
+
+    }
     listAllSubmissions();
-  }, []);
+  }, [user?.role, getHeaders, user?.firstname, user?.id, user?.lastname]);
 
   if (isLoading) {
     return (

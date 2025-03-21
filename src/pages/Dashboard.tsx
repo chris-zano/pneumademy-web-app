@@ -15,69 +15,69 @@ const Dashboard = () => {
   const [totalCourses, setTotalCourses] = useState(0);
   const [totalLearners, setTotalLearners] = useState(0);
 
-  const { user } = useAuth();
+  const { user, getHeaders } = useAuth();
   const isInstructor = user?.role === "instructor";
   const isLearner = user?.role === "learner";
   const [isLoading, setIsLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<Course[]>([]);
 
+  useEffect(() => {
 
+    const fetchCourses = async () => {
+      const data = await getCourses(getHeaders);
+      setCourses(data);
+    }
+    const fetchTotalCourses = async () => {
+      const data = await getTotalCourses(getHeaders);
+      setTotalCourses(data);
+    }
+    const fetchTotalLearners = async () => {
+      const data = await getTotalLearners(getHeaders);
+      setTotalLearners(data);
+    }
 
-  const getLearnerEnrollments = async () => {
+    const getLearnerEnrollments = async () => {
 
-    const response = await fetch(
-      `${BASEURL}enrollments?id=${user?.id}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+      const response = await fetch(
+        `${BASEURL}enrollments?id=${user?.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
 
-    const data = await response.json();
-    return data;
-  }
+      const data = await response.json();
+      return data;
+    }
+
+    const fetchEnrollments = async () => {
+      const data = await getLearnerEnrollments();
+      setEnrollments(data);
+    }
+    if (isLearner) {
+      setIsLoading(true);
+
+      fetchEnrollments();
+      setIsLoading(false);
+    }
+
+    if (isInstructor) {
+      setIsLoading(true);
+
+      fetchCourses();
+      fetchTotalCourses();
+      fetchTotalLearners();
+      setIsLoading(false);
+    }
+  }, [user?.id, isInstructor, isLearner, getHeaders])
 
   if (isLoading) {
     return (
       <LoadingSpinnerCard />
     )
-  }
-
-  if (isLearner) {
-    useEffect(() => {
-      setIsLoading(true);
-      const fetchEnrollments = async () => {
-        const data = await getLearnerEnrollments();
-        setEnrollments(data);
-      }
-      fetchEnrollments();
-      setIsLoading(false);
-    }, []);
-  }
-
-  if (isInstructor) {
-    useEffect(() => {
-      setIsLoading(true);
-      const fetchCourses = async () => {
-        const data = await getCourses();
-        setCourses(data);
-      }
-      const fetchTotalCourses = async () => {
-        const data = await getTotalCourses();
-        setTotalCourses(data);
-      }
-      const fetchTotalLearners = async () => {
-        const data = await getTotalLearners();
-        setTotalLearners(data);
-      }
-      fetchCourses();
-      fetchTotalCourses();
-      fetchTotalLearners();
-      setIsLoading(false);
-    }, []);
   }
 
   return (

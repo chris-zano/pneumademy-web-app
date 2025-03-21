@@ -2,15 +2,14 @@ import { BASEURL } from "../constants";
 import Course from "../types/course";
 import Lesson from "../types/lesson";
 
-export const getCourses = async (): Promise<Course[]> => {
+export const getCourses = async (getHeaders: () => Promise<HeadersInit>): Promise<Course[]> => {
     try {
+        const _headers = await getHeaders()
         const response = await fetch(
             `${BASEURL}courses`,
             {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: _headers,
             }
         );
 

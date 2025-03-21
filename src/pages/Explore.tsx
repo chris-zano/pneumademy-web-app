@@ -11,7 +11,7 @@ import { BASEURL } from "../constants";
 
 function Explore() {
 
-  const { user } = useAuth();
+  const { user, getHeaders } = useAuth();
   const [
     createCourseModalIsOpen, setcreateCourseModalIsOpen
   ] = useState<boolean>(false);
@@ -22,7 +22,7 @@ function Explore() {
   const [courseBtnIsActive, setCourseBtnIsActive] = useState<boolean>(false);
   const [FilterModalIsActive, setFilterModalIsActive] = useState<boolean>(false);
 
-  const [learnerEnrollments, setLearnerEnrollments] = useState<any[]>([]);
+  const [learnerEnrollments, setLearnerEnrollments] = useState<Course[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
 
 
@@ -39,25 +39,24 @@ function Explore() {
     courses.push(course);
   }
 
-  const getLearnerEnrollments = async () => {
-
-    const response = await fetch(
-      `${BASEURL}enrollments?id=${user?.id}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
-
-    const data = await response.json();
-    return data;
-  }
-
   useEffect(() => {
+    const getLearnerEnrollments = async () => {
+
+      const response = await fetch(
+        `${BASEURL}enrollments?id=${user?.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+
+      const data = await response.json();
+      return data;
+    }
     const fetchCourses = async () => {
-      const data = await getCourses();
+      const data = await getCourses(getHeaders);
       setCourses(data);
     }
 
@@ -70,7 +69,7 @@ function Explore() {
 
     }
 
-  }, []);
+  }, [user?.role, user?.id, getHeaders]);
 
   return (
     <>

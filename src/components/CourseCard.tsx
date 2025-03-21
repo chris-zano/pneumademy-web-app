@@ -62,7 +62,7 @@ const CourseCard: React.FC<CourseCardProps> = (
   }
 
 
-  const handleEnroll = (e: any) => {
+  const handleEnroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!user) {
       alert('Please login to enroll in a course');
       return;

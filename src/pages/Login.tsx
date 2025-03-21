@@ -2,16 +2,17 @@ import { useState } from "react";
 import { BASEURL } from "../constants";
 import { User } from "../types/user";
 import { useAuth } from "../context/AuthProvider";
-import Notification from "../components/Notification";
+import Notification, { NotificationType } from "../components/Notification";
+import Encoder from "../utils/encodeData";
 
 const Login = () => {
-  const { login } = useAuth()
+  const { login, getSessionFingerPrint } = useAuth()
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [notifications, setNotifications] = useState<{ id: number; type: any; message: string }[]>([]);
+  const [notifications, setNotifications] = useState<{ id: number; type: NotificationType; message: string }[]>([]);
 
-  const addNotification = (type: any, message: string) => {
+  const addNotification = (type: NotificationType, message: string) => {
     const id = Date.now();
     setNotifications([...notifications, { id, type, message }]);
     setTimeout(() => setNotifications((prev) => prev.filter((n) => n.id !== id)), 3000);
@@ -20,6 +21,16 @@ const Login = () => {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
+
+      const sessionFingerprint = await getSessionFingerPrint();
+      const encoder = new Encoder();
+      const encodedEmailString = encoder.encode(email);
+      const encodedFingerPrint = encoder.encode(sessionFingerprint)
+
+      console.log({
+        email: encodedEmailString,
+        fingerprint: encodedFingerPrint
+      })
 
       const response: Response = await fetch(
         `${BASEURL}auth/verify-email`,
@@ -53,12 +64,15 @@ const Login = () => {
     try {
       e.preventDefault();
 
+      const sessionFingerprint = await getSessionFingerPrint();
+
       const response: Response = await fetch(
         `${BASEURL}auth/verify-code`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-fingerprint': `${sessionFingerprint}`
           },
           body: JSON.stringify({ email, code}),
         }
@@ -70,7 +84,7 @@ const Login = () => {
         return;
       }
 
-      const data: User = await response.json();
+      const data: string = await response.json();
       if (data) {
         addNotification("success", "Login Successful");
         login(data)
@@ -102,7 +116,7 @@ const Login = () => {
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
             />
-            <button type="submit" className="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+            <button type="submit" className="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 cursor-pointer">
               Continue
             </button>
           </form>
@@ -119,7 +133,7 @@ const Login = () => {
               className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter code"
             />
-            <button type="submit" className="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+            <button type="submit" className="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 cursor-pointer">
               Login
             </button>
           </form>
