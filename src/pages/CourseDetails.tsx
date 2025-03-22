@@ -15,7 +15,7 @@ import VideoViewModal from "../components/modals/VideoViewModal";
 import AudioViewModal from "../components/modals/AudioViewModal";
 import ImageViewModal from "../components/modals/ImageViewModal";
 function CourseDetails() {
-  const { user } = useAuth();
+  const { user, getHeaders } = useAuth();
   const { id } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -50,24 +50,24 @@ function CourseDetails() {
 
   useEffect(() => {
     const getCourseData = async (id: string) => {
-      const data: Course = await getCourse(id);
+      const data: Course = await getCourse(id, getHeaders);
       setCourse(data);
     }
 
     getCourseData(id as string);
-  }, []);
+  }, [getHeaders, id]);
 
   useEffect(() => {
     setIsLoading(true);
     const getLessons = async (id: string) => {
-      const data: Lesson[] = await getCourseLessons(id);
+      const data: Lesson[] = await getCourseLessons(id, getHeaders);
       console.log(data);
       setLessons(data);
       setIsLoading(false);
     }
 
     getLessons(id as string);
-  }, []);
+  }, [getHeaders, id]);
 
   const updateLessonsListOnPage = (lesson: Lesson) => {
     lessons.push(lesson);
@@ -97,10 +97,12 @@ function CourseDetails() {
 
   const handleDeleteLesson = async (lesson: Lesson) => {
     setIsLoading(true);
+    const _headers = await getHeaders()
     const response = await fetch(
       `${BASEURL}lessons/${lesson._id}`,
       {
         method: "DELETE",
+        headers: _headers
       });
 
     if (response.ok) {
@@ -153,7 +155,8 @@ function CourseDetails() {
         onClose={showFilterModal}
         setLessonsCall={updateLessonsListOnPage}
         key={0}
-        course_id={id!} />
+        course_id={id!} 
+        />
       <GoogleViewModal
         isOpen={isGoogleOpen}
         onClose={() => setIsGoogleOpen(false)}
@@ -208,8 +211,9 @@ function CourseDetails() {
 
           <h1 className="text-2xl font-bold">{course.course_name}</h1>
           <p className="text-gray-500">{course.course_description}</p>
+
           <p className="text-gray-500">
-            <strong>Course Code:</strong> {course.course_code}
+            <strong>Level: </strong>{course.course_level}
           </p>
           <p className="text-gray-500">
             <strong>Duration: </strong>{course.course_duration}
@@ -225,8 +229,8 @@ function CourseDetails() {
               lessons.length === 0 ?
                 <p className="text-gray-500">No lessons yet</p>
                 :
-                lessons.map((lesson) => (
-                  <details key={lesson._id} className="flex flex-col mb-2 p-4 border border-slate-200 rounded-lg cursor-pointer">
+                lessons.map((lesson, index) => (
+                  <details key={index} className="flex flex-col mb-2 p-4 border border-slate-200 rounded-lg cursor-pointer">
                     <summary className="flex justify-between">
                       <h3 className="text-lg font-semibold">{lesson.title}</h3>
                       {

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import DurationComponent from "../DurationComponent";
 import { BASEURL } from "../../constants";
 import Course from "../../types/course";
 import LoadingSpinnerCard from "./LoadingSpinnerCard";
+import { useAuth } from "../../context/AuthProvider";
 
 function EditCourseModal(
     {
@@ -20,14 +22,14 @@ function EditCourseModal(
 ) {
     const [course, setCourse] = useState({
         _id: course_data ? course_data._id : "",
-        course_code: course_data ? course_data.course_code : "",
+        course_level: course_data ? course_data.course_level : "",
         course_name: course_data ? course_data.course_name : "",
         course_description: course_data ? course_data.course_description : "",
-        course_instructor: course_data ? course_data.course_instructor : "",
         course_duration: course_data ? course_data.course_duration : "",
     });
 
     const [isLoading, setIsLoading] = useState(false);
+    const {getHeaders} = useAuth();
 
     const handleChange = (e: any) => {
         const { name, value } = e.target;
@@ -38,7 +40,7 @@ function EditCourseModal(
         e.preventDefault();
 
         if (
-            !course.course_code ||
+            !course.course_level ||
             !course.course_name ||
             !course.course_description
         ) {
@@ -46,20 +48,14 @@ function EditCourseModal(
             return;
         }
 
-        if (!course.course_instructor) {
-            alert("Course Instructor is not set");
-            return;
-        }
-
         setIsLoading(true);
 
+        const _headers = await getHeaders();
         const response: Response = await fetch(
             `${BASEURL}courses/edit?id=${course_data?._id}`,
             {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: _headers,
                 body: JSON.stringify(course),
             }
         )
@@ -93,17 +89,6 @@ function EditCourseModal(
             <div className="bg-white  p-6 rounded-xl shadow-lg w-full max-w-xl">
                 <form onSubmit={handleSubmit} className="space-y-2 bg-white">
                     <h2 className="text-xl text-center font-semibold text-black mb-4">Add a new Lesson</h2>
-
-                    <label htmlFor="course_code">Course Code</label>
-                    <Input
-                        type="text"
-                        id="course_code"
-                        name="course_code"
-                        placeholder="eg.(CE 235) means second year beginner computer engineering course"
-                        value={course.course_code}
-                        onChange={handleChange}
-                        required
-                    />
                     <label htmlFor="course_code">Course Name</label>
                     <Input
                         type="text"
@@ -124,6 +109,13 @@ function EditCourseModal(
                         className="w-full p-2 h-[150px] border rounded-xl border-slate-700"
                         required
                     />
+                    <label htmlFor="course_level">Course Level</label>
+                    <select id="course_level" name="course_level" className="w-full px-2 py-4 border rounded-xl border-slate-700" onChange={handleChange}>
+                        <option value="">Select a level</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
                     <label htmlFor="course_duration">Course Duration</label><br />
                     <DurationComponent
                         field_name="course_duration"

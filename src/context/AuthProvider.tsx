@@ -12,7 +12,7 @@ type AuthContextType = {
   isLoading: boolean;
   getUser: () => User | null;
   getSessionFingerPrint: () => Promise<unknown>;
-  getHeaders: () => Promise<HeadersInit>;
+  getHeaders: (multipart? : boolean) => Promise<HeadersInit>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  const getHeaders = async (): Promise<HeadersInit> => {
+  const getHeaders = async (multipart: boolean = false): Promise<HeadersInit> => {
     const fingerprint = await getSessionFingerPrint();
     const encoder = new Encoder();
 
@@ -58,12 +58,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const encodedEncryptedUserData = encoder.encode(encryptedUserData);
 
-
-    return {
-      'Content-Type': 'application/json',
-      "x-fingerprint": fingerprint!,
-      "x-user-data": encodedEncryptedUserData
-    }
+    return multipart ?
+      {
+        "x-fingerprint": fingerprint!,
+        "x-user-data": encodedEncryptedUserData
+      }
+      : {
+        'Content-Type': 'application/json',
+        "x-fingerprint": fingerprint!,
+        "x-user-data": encodedEncryptedUserData
+      }
   }
 
   type EncryptedData = {

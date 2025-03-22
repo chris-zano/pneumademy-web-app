@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { BASEURL } from "../../constants";
 import Lesson, { ContentType } from "../../types/lesson";
 import LoadingSpinnerCard from "./LoadingSpinnerCard";
+import { useAuth } from "../../context/AuthProvider";
 
 interface AddLessonModalProps {
     isOpen: boolean;
@@ -12,6 +14,7 @@ interface AddLessonModalProps {
 
 function AddLessonModal({ isOpen, onClose, setLessonsCall, course_id }: AddLessonModalProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const { getHeaders } = useAuth();
 
 
     const [lesson, setLesson] = useState<Omit<Lesson, "content">>({
@@ -48,8 +51,11 @@ function AddLessonModal({ isOpen, onClose, setLessonsCall, course_id }: AddLesso
         formData.append("document", file);
 
         setIsLoading(true);
+        const __headers = await getHeaders(true);
+        
         const response = await fetch(`${BASEURL}lessons`, {
             method: "POST",
+            headers: __headers,
             body: formData,
         });
 

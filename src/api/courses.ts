@@ -21,16 +21,15 @@ export const getCourses = async (getHeaders: () => Promise<HeadersInit>): Promis
     }
 }
 
-export const getCourse = async (id: string | undefined): Promise<Course> => {
+export const getCourse = async (id: string | undefined, getHeaders: () => Promise<HeadersInit>): Promise<Course> => {
 
+    const _headers = await getHeaders();
     try {
         const response = await fetch(
             `${BASEURL}courses/${id}`,
             {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: _headers
             }
         );
         const data: Course = await response.json();
@@ -42,16 +41,15 @@ export const getCourse = async (id: string | undefined): Promise<Course> => {
 
 }
 
-export const getCourseLessons = async (id: string | undefined): Promise<Lesson[]> => {
+export const getCourseLessons = async (id: string | undefined, getHeaders: () => Promise<HeadersInit>): Promise<Lesson[]> => {
 
     try {
+    const _headers = await getHeaders();
         const response = await fetch(
             `${BASEURL}courses/${id}/lessons`,
             {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: _headers
             }
         );
         const data: Lesson[] = await response.json();
