@@ -1,4 +1,5 @@
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function DurationComponent({ className, field_name, onChangeHandler }: { className: string, field_name: string, onChangeHandler: (e: any) => void }) {
     return (
         <>
@@ -8,6 +9,7 @@ function DurationComponent({ className, field_name, onChangeHandler }: { classNa
                 className={`${className ? className : "p-2 border rounded-md"}`}
                 onChange={onChangeHandler}
             >
+                <option value="">Select a duration</option>
                 <option value="1 week">1 week</option>
                 <option value="2 weeks">2 weeks</option>
                 <option value="3 weeks">3 weeks</option>

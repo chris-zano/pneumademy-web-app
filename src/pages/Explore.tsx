@@ -41,14 +41,12 @@ function Explore() {
 
   useEffect(() => {
     const getLearnerEnrollments = async () => {
-
+      const _headers = await getHeaders()
       const response = await fetch(
         `${BASEURL}enrollments?id=${user?.id}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: _headers
         }
       )
 
@@ -151,7 +149,6 @@ function Explore() {
                         id={course?._id}
                         title={course?.course_name}
                         description={course?.course_description}
-                        instructor={course?.course_instructor}
                         progress={20}
                       />
                     </li>
@@ -179,7 +176,6 @@ function Explore() {
                     id={course?._id}
                     title={course?.course_name}
                     description={course?.course_description}
-                    instructor={course?.course_instructor}
                     progress={20}
                     checkLearnerIsEnrolled={true}
                     showProgress={true}

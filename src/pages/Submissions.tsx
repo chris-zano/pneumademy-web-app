@@ -69,7 +69,7 @@ function Submissions() {
           headers: _headers
         });
         const data = await response.json();
-        const instructorCourses = data.filter((course: Course) => course.course_instructor === `${user?.firstname} ${user?.lastname}`);
+        const instructorCourses = data;
         return instructorCourses;
       } catch (error) {
         console.error(error);

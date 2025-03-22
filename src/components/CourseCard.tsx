@@ -9,7 +9,6 @@ interface CourseCardProps {
   id: string;
   title: string;
   description: string;
-  instructor: string;
   progress: number;
   showProgress?: boolean;
   checkLearnerIsEnrolled?: boolean;
@@ -17,7 +16,7 @@ interface CourseCardProps {
 }
 
 const CourseCard: React.FC<CourseCardProps> = (
-  { id, title, description, instructor, progress, showProgress = false, checkLearnerIsEnrolled = false, learnerEnrollments = [] }
+  { id, title, description, progress, showProgress = false, checkLearnerIsEnrolled = false, learnerEnrollments = [] }
 ) => {
   const { user } = useAuth();
 
@@ -92,11 +91,6 @@ const CourseCard: React.FC<CourseCardProps> = (
         <div className="p-4">
           <h3 className="text-lg font-semibold truncate">{title}</h3>
           <p className="text-sm text-gray-600 mt-1 line-clamp-2">{description}</p>
-
-          {/* Instructor */}
-          <p className="text-sm text-gray-500 mt-2">
-            <span className="font-medium">Instructor:</span> {instructor}
-          </p>
 
           {/* Progress Bar */}
           {

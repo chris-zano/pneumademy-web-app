@@ -2,33 +2,31 @@ import { useState } from "react";
 import DurationComponent from "../DurationComponent";
 import { BASEURL } from "../../constants";
 import { useAuth } from "../../context/AuthProvider";
-import { User } from "../../types/user";
 import Course from "../../types/course";
 
 function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolean, onclose: () => void, setCoursesCall: (course: Course) => void }) {
-    const {getUser} = useAuth();
-    const user: User | null = getUser();
-    const instructor: string = `${user?.firstname} ${user?.lastname}`;
+    const {getHeaders} = useAuth();
 
     const [course, setCourse] = useState({
         _id: "",
-        course_code: "",
+        course_level: "",
         course_name: "",
         course_description: "",
-        course_instructor: instructor,
         course_duration: "",
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleChange = (e: any) => {
         const { name, value } = e.target;
         setCourse((prev: Course) => ({ ...prev, [name]: value }));
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleSubmit = async (e: any) => {
         e.preventDefault();
 
         if (
-            !course.course_code || 
+            !course.course_level|| 
             !course.course_name || 
             !course.course_description
         ) 
@@ -36,22 +34,15 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
             alert("Please fill in all fields");
             return;
         }
-        
-        if(!course.course_instructor) {
-            alert("Course Instructor is not set");
-            return;
-        }
 
         console.log("Course Data:", course);
 
-
+        const _headers = await getHeaders()
         const response: Response = await fetch(
             `${BASEURL}courses`,
             {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: _headers,
                 body: JSON.stringify(course),
             }
         )
@@ -71,16 +62,6 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
                 <form onSubmit={handleSubmit} className="space-y-2 bg-white">
                     <h2 className="text-xl text-center font-semibold text-black mb-4">Create a new Course</h2>
 
-                    <label htmlFor="course_code">Course Code</label>
-                    <Input
-                        type="text"
-                        id="course_code"
-                        name="course_code"
-                        placeholder="eg.(CE 235) means second year beginner computer engineering course"
-                        value={course.course_code}
-                        onChange={handleChange}
-                        required
-                    />
                     <label htmlFor="course_code">Course Name</label>
                     <Input
                         type="text"
@@ -101,6 +82,13 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
                         className="w-full p-2 h-[150px] border rounded-xl border-slate-700"
                         required
                     />
+                    <label htmlFor="course_level">Course Level</label>
+                    <select id="course_level" name="course_level" className="w-full px-2 py-4 border rounded-xl border-slate-700" onChange={handleChange}>
+                        <option value="">Select a level</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
                     <label htmlFor="course_duration">Course Duration</label><br />
                     <DurationComponent
                     field_name="course_duration"
@@ -117,6 +105,7 @@ function CreateCourseModal({ isOpen, onclose, setCoursesCall }: { isOpen: boolea
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Input = ({ type, id, name, placeholder, value, onChange, required }: { type: string, id: string, name: string, placeholder: string, value: string, onChange: (e: any) => void, required: boolean }) => {
     return (
         <input
