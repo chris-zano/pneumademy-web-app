@@ -94,7 +94,6 @@ const Dashboard = () => {
                 key={index}
                 title={course.course_name}
                 description={course.course_description}
-                instructor={course.course_instructor}
                 progress={30}
               />
             )) : enrollments.map((enrollment, index) => (
@@ -103,7 +102,6 @@ const Dashboard = () => {
                 key={index}
                 title={enrollment.course_name}
                 description={enrollment.course_description}
-                instructor={enrollment.course_instructor}
                 progress={30}
                 showProgress={true}
                 learnerEnrollments={enrollments}

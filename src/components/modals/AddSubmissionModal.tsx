@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import ISubmission from "../../types/submissions"
 import { BASEURL } from "../../constants";
 import { User } from "../../types/user";
 import LoadingSpinnerCard from "./LoadingSpinnerCard";
+import { useAuth } from "../../context/AuthProvider";
 
 function AddSubmissionModal(
     {
@@ -20,17 +22,19 @@ function AddSubmissionModal(
     }
 ) {
 
-    if (!isOpen) return null;
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const {getHeaders} = useAuth();
 
     const handleFileChange = (e: any) => {
         setFile(e.target.files[0]);
     };
+    if (!isOpen) return null;
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         setIsLoading(true);
+        const _headers = await getHeaders();
         try {
             const formData = new FormData();
             console.log(file);
@@ -42,6 +46,7 @@ function AddSubmissionModal(
             formData.append("user_id", user?.id);
             const response = await fetch(`${BASEURL}submissions?user_id=${user?.id}&submission_id=${submission_id}`, {
                 method: "PUT",
+                headers: _headers,
                 body: formData,
             });
 

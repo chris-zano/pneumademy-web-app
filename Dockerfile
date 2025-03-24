@@ -6,9 +6,9 @@ COPY package*.json ./
 
 COPY . .
 
-RUN yarn
+RUN npm install
 
-RUN yarn build
+RUN npm run build
 
 
 FROM nginx:latest

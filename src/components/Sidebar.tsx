@@ -93,8 +93,9 @@ const SidebarItem = ({ to, icon, text, onClose, isCollapsed }: {
       onClick={onClose}
       className={`
         relative
+        poppins-semibold
         flex items-center gap-3 p-2 rounded-md transition-all
-        ${isActive ? "bg-blue-500 text-white font-semibold" : "hover:bg-gray-100 text-gray-900"}
+        ${isActive ? "bg-slate-900 text-white font-semibold" : "hover:bg-gray-100 text-gray-900"}
         ${isCollapsed ? "justify-center size-10" : ""}
       `}
     >

@@ -12,7 +12,7 @@ const Navbar = ({ onSidebarToggle }: { onSidebarToggle: () => void }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 shadow-sm z-50 bg-white flex items-center px-6 justify-between">
+    <header className="fixed top-0 left-0 poppins-regular right-0 h-16 shadow-sm z-50 bg-white flex items-center px-6 justify-between">
       {/* Sidebar Toggle Button (Mobile) */}
       <button onClick={onSidebarToggle} className="md:hidden">
         <Menu className="w-6 h-6 text-gray-600" />
@@ -20,7 +20,23 @@ const Navbar = ({ onSidebarToggle }: { onSidebarToggle: () => void }) => {
 
       {/* Logo + Title */}
       <div className="flex items-center gap-2">
-        <span className="text-lg font poppins-regular hidden md:block md:text-2xl">📚 Pn</span>
+        <span className="text-lg font poppins-semibold hidden md:block md:text-2xl">📚 Pn</span>
+      </div>
+
+      {/* global */}
+      <div>
+        <input
+          type="text"
+          placeholder="Search..."
+          className="
+          p-2
+          hidden
+          md:flex
+          md:w-[400px] 
+          border 
+          border-gray-300 rounded-md 
+          focus:outline-none focus:border-slate-900"
+        />
       </div>
 
       {/* Right Icons */}
@@ -38,7 +54,7 @@ const Navbar = ({ onSidebarToggle }: { onSidebarToggle: () => void }) => {
             className="
             focus:outline-none flex align-center gap-2 
             border p-2 rounded-2xl cursor-pointer transition-all ease-in-out 250ms
-            hover:border-transparent hover:bg-sky-300 hover:text-white
+            hover:border-transparent hover:bg-slate-900 hover:text-white
             "
           >
             {
