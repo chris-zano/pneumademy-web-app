@@ -85,32 +85,46 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="flex-2 space-y-4">
         {/* Enrolled Courses Section */}
-        <section className="bg-white p-4 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Enrolled Courses</h2>
-          <div className="grid grid-cols-1 md:flex gap-4 flex-wrap">
-            {isInstructor ? courses.map((course, index) => (
-              <CourseCard
-                id={course._id}
-                key={index}
-                title={course.course_name}
-                description={course.course_description}
-                progress={30}
-              />
-            )) : enrollments.map((enrollment, index) => (
-              <CourseCard
-                id={enrollment._id}
-                key={index}
-                title={enrollment.course_name}
-                description={enrollment.course_description}
-                progress={30}
-                showProgress={true}
-                learnerEnrollments={enrollments}
-                checkLearnerIsEnrolled={true}
-              />
-            ))}
-          </div>
-          <Link to="/courses" className="block mt-4 text-blue-500">Show All</Link>
-        </section>
+        {
+          courses.length === 0 && enrollments.length === 0 ? (
+            <div className="bg-white p-4 rounded-lg">
+              <h2 className="text-xl font-semibold mb-4">
+                {isInstructor ? "No Courses Created" : "No Courses Enrolled"}
+              </h2>
+              <p className="text-gray-600">
+                {isInstructor ? "Create a course to get started." : "Enroll in a course to get started."}
+              </p>
+            </div>
+          ) : (
+            <section className="bg-white p-4 rounded-lg">
+              <h2 className="text-xl font-semibold mb-4">Enrolled Courses</h2>
+              <div className="grid grid-cols-1 md:flex gap-4 flex-wrap">
+                {isInstructor ? courses.map((course, index) => (
+                  <CourseCard
+                    id={course._id}
+                    key={index}
+                    title={course.course_name}
+                    description={course.course_description}
+                    progress={30}
+                  />
+                )) : enrollments.map((enrollment, index) => (
+                  <CourseCard
+                    id={enrollment._id}
+                    key={index}
+                    title={enrollment.course_name}
+                    description={enrollment.course_description}
+                    progress={30}
+                    showProgress={true}
+                    learnerEnrollments={enrollments}
+                    checkLearnerIsEnrolled={true}
+                  />
+                ))}
+              </div>
+              <Link to="/courses" className="block mt-4 text-blue-500">Show All</Link>
+            </section>
+          )
+
+        }
 
         {/* Statistics Section */}
         <section className="bg-white p-4 rounded-lg shadow-md">

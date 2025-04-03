@@ -1,9 +1,9 @@
 import { JSX, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getCourse, getCourseLessons } from "../api/courses";
 import Course from "../types/course";
 import { useAuth } from "../context/AuthProvider";
-import { PenIcon, Plus, Trash } from "lucide-react";
+import { PenIcon, Plus, Trash, Trash2Icon } from "lucide-react";
 import Lesson, { ContentType } from "../types/lesson";
 import EditCourseModal from "../components/modals/EditCourseModal";
 import AddLessonModal from "../components/modals/AddLessonModal";
@@ -14,12 +14,15 @@ import LoadingSpinnerCard from "../components/modals/LoadingSpinnerCard";
 import VideoViewModal from "../components/modals/VideoViewModal";
 import AudioViewModal from "../components/modals/AudioViewModal";
 import ImageViewModal from "../components/modals/ImageViewModal";
+import ConfirmationModal from "../components/modals/ConfirmationModal";
+
 function CourseDetails() {
   const { user, getHeaders } = useAuth();
   const { id } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const [
     createCourseModalIsOpen, setcreateCourseModalIsOpen
@@ -31,6 +34,9 @@ function CourseDetails() {
   const [courseBtnIsActive, setCourseBtnIsActive] = useState<boolean>(false);
   const [FilterModalIsActive, setFilterModalIsActive] = useState<boolean>(false);
 
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState<boolean>(false);
+  const [confirmationModalIsActive, setConfirmationModalIsActive] = useState<boolean>(false);
+
   const [isGoogleOpen, setIsGoogleOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isAudioOpen, setIsAudioOpen] = useState(false);
@@ -38,6 +44,10 @@ function CourseDetails() {
   const [fileUrl, setFileUrl] = useState("");
 
 
+  const showConfirmationModal = () => {
+    setConfirmationModalIsActive(!confirmationModalIsActive);
+    setConfirmationModalIsOpen(!confirmationModalIsOpen);
+  }
 
   const showFilterModal = () => {
     setFilterModalIsActive(!FilterModalIsActive);
@@ -61,7 +71,6 @@ function CourseDetails() {
     setIsLoading(true);
     const getLessons = async (id: string) => {
       const data: Lesson[] = await getCourseLessons(id, getHeaders);
-      console.log(data);
       setLessons(data);
       setIsLoading(false);
     }
@@ -95,6 +104,33 @@ function CourseDetails() {
 
   }
 
+  const handleDeleteCourse = async () => {
+    try {
+      const _id = id;
+      const _headers = await getHeaders();
+
+      setIsLoading(true);
+      const response = await fetch(
+        `${BASEURL}courses?id=${_id}`,
+        {
+          method: "DELETE",
+          headers: _headers
+        });
+      if (response.ok) {
+        await response.json();
+        setIsLoading(false);
+      }
+      else {
+        setIsLoading(false);
+      }
+      navigate("/courses");
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      navigate("/courses");
+    }
+  }
+
   const handleDeleteLesson = async (lesson: Lesson) => {
     setIsLoading(true);
     const _headers = await getHeaders()
@@ -107,7 +143,6 @@ function CourseDetails() {
 
     if (response.ok) {
       const newLessons = lessons.filter((l) => l._id !== lesson._id);
-      console.log(newLessons);
       setLessons(newLessons);
     }
     setIsLoading(false);
@@ -141,11 +176,21 @@ function CourseDetails() {
 
   return (
     <>
+      <ConfirmationModal
+        isOpen={confirmationModalIsOpen}
+        onclose={showConfirmationModal}
+        message="Are you sure you want to delete this course?"
+        confirmButtonText="Delete"
+        cancelButtonText="Cancel"
+        onConfirmed={handleDeleteCourse}
+        onCancelled={() => { }}
+        optionalWarning="This action cannot be undone."
+      />
 
       <EditCourseModal
         isOpen={createCourseModalIsOpen}
         onclose={showCreateCourseModal}
-        setCoursesCall={(course: Course) => { 
+        setCoursesCall={(course: Course) => {
           setCourse(course);
         }}
         course_data={course}
@@ -155,8 +200,8 @@ function CourseDetails() {
         onClose={showFilterModal}
         setLessonsCall={updateLessonsListOnPage}
         key={0}
-        course_id={id!} 
-        />
+        course_id={id!}
+      />
       <GoogleViewModal
         isOpen={isGoogleOpen}
         onClose={() => setIsGoogleOpen(false)}
@@ -200,6 +245,11 @@ function CourseDetails() {
               text="Edit"
               isActive={courseBtnIsActive}
               onclickHandler={showCreateCourseModal} />
+            <ActionButton
+              icon={<Trash2Icon />}
+              text="Delete"
+              isActive={courseBtnIsActive}
+              onclickHandler={showConfirmationModal} />
 
           </nav>
         </section>
@@ -251,10 +301,10 @@ function CourseDetails() {
                       className="flex text-lg py-2 px-5 items-center gap-3"
                       onClick={() => { }}>
                       {getFileIcon(lesson.content_type)}
-                      <p className="text-gray-500" 
-                      onClick={() => {
-                        updateFileUrl(lesson);
-                      }}>
+                      <p className="text-gray-500"
+                        onClick={() => {
+                          updateFileUrl(lesson);
+                        }}>
                         {lesson.title} [ {lesson.content_type} ]
                       </p>
                     </article>

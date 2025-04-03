@@ -5,7 +5,7 @@ import Login from "../pages/Login";
 import RoleBasedRoute from "./RoleBasedRoute";
 import Explore from "../pages/Explore";
 import MyCourses from "../pages/MyCourses";
-import Submissions from "../pages/Submissions";
+// import Submissions from "../pages/Submissions";
 import Quizzes from "../pages/Quizzes";
 import Resources from "../pages/Resources";
 import Settings from "../pages/Settings";
@@ -25,7 +25,7 @@ const AppRoutes = () => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="courses" element={<Explore />} />
           <Route path="enrollments" element={<MyCourses />} />
-          <Route path="submissions" element={<Submissions />} />
+          {/* <Route path="submissions" element={<Submissions />} /> */}
           <Route path="quizzes" element={<Quizzes />} />
           <Route path="resources" element={<Resources />} />
           <Route path="settings" element={<Settings />} />

@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Book,
   BookOpen,
-  FileText,
   ListChecks,
   Library,
   Settings,
@@ -63,7 +62,7 @@ const Sidebar = ({ isOpen, onClose, updateIsCollapsed, isCollapsed }: { isOpen: 
                   <SidebarItem to="/enrollments" icon={<BookOpen />} text="Enrollments" onClose={onClose} isCollapsed={isCollapsed} /></>
               )
             }
-            <SidebarItem to="/submissions" icon={<FileText />} text="Submissions" onClose={onClose} isCollapsed={isCollapsed} />
+            {/* <SidebarItem to="/submissions" icon={<FileText />} text="Submissions" onClose={onClose} isCollapsed={isCollapsed} /> */}
             <SidebarItem to="/quizzes" icon={<ListChecks />} text="Quizzes" onClose={onClose} isCollapsed={isCollapsed} />
             <SidebarItem to="/resources" icon={<Library />} text="Library" onClose={onClose} isCollapsed={isCollapsed} />
             <SidebarItem to="/settings" icon={<Settings />} text="Settings" onClose={onClose} isCollapsed={isCollapsed} />

@@ -60,7 +60,6 @@ function AddLessonModal({ isOpen, onClose, setLessonsCall, course_id }: AddLesso
         });
 
         const newLesson: Lesson = await response.json();
-        console.log("New Lesson:", newLesson);
         setLessonsCall(newLesson);
         setIsLoading(false);
         onClose();
